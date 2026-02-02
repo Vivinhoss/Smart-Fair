@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feira Inteligente</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(81, 97, 102, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #516166;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 32px;
+            letter-spacing: -0.5px;
+        }
+
+        .form,
+        .filtro {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        input,
+        select,
+        button {
+            padding: 12px 16px;
+            font-size: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+            background: #ffffff;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #75CDE6;
+            box-shadow: 0 0 0 3px rgba(117, 205, 230, 0.1);
+        }
+
+        input::placeholder {
+            color: #adb5bd;
+        }
+
+        #nomeItem {
+            flex: 2;
+        }
+
+        #quantidadeItem {
+            flex: 0.8;
+            width: 100px;
+        }
+
+        #categoriaItem {
+            flex: 1.2;
+            color: #516166;
+            cursor: pointer;
+        }
+
+        button {
+            background: #75CDE6;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            padding: 12px 24px;
+        }
+
+        button:hover {
+            background: #5fbdd6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(117, 205, 230, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #adicionarBtn {
+            background: #75E6B4;
+            color: #516166;
+        }
+
+        #adicionarBtn:hover {
+            background: #5fd6a4;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 24px;
+        }
+
+        li {
+            display: grid;
+            grid-template-columns: 2fr 0.8fr 1fr 1.2fr 1fr auto;
+            gap: 10px;
+            align-items: center;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        li:hover {
+            border-color: #e9ecef;
+            box-shadow: 0 2px 8px rgba(81, 97, 102, 0.06);
+        }
+
+        li input,
+        li select {
+            border: 1px solid rgba(81, 97, 102, 0.15);
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+        }
+
+        li input:focus,
+        li select:focus {
+            border-color: #75CDE6;
+        }
+
+        li span {
+            font-weight: 600;
+            color: #516166;
+            font-size: 15px;
+            text-align: right;
+        }
+
+        .remover {
+            background: #E59774;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            width: 90px;
+        }
+
+        .remover:hover {
+            background: #d58564;
+            transform: translateY(-1px);
+        }
+
+        .acoes {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        #limparLista {
+            background: #516166;
+        }
+
+        #limparLista:hover {
+            background: #415156;
+        }
+
+        #exportarPdf {
+            background: #75E6B4;
+            color: #516166;
+        }
+
+        #exportarPdf:hover {
+            background: #5fd6a4;
+        }
+
+        h3 {
+            color: #516166;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: -0.3px;
+        }
+
+        .totais-categoria {
+            margin-top: 16px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+        }
+
+        .totais-categoria strong {
+            color: #516166;
+            font-size: 16px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(81, 97, 102, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(81, 97, 102, 0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content p {
+            color: #516166;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-confirmar {
+            background: #E59774;
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-confirmar:hover {
+            background: #d58564;
+        }
+
+        .btn-cancelar {
+            background: #e9ecef;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            color: #516166;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-cancelar:hover {
+            background: #dee2e6;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #516166;
+            color: #ffffff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2000;
+            box-shadow: 0 4px 16px rgba(81, 97, 102, 0.3);
+            font-weight: 500;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== FILTRO ===== */
+        #filtroCategoria {
+            flex: 1;
+            color: #516166;
+            cursor: pointer;
+        }
+
+        /* ===== RESPONSIVO ===== */
+        @media (max-width: 700px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+                margin-bottom: 24px;
+            }
+
+            .form {
+                flex-direction: column;
+            }
+
+            #nomeItem,
+            #quantidadeItem,
+            #categoriaItem,
+            #adicionarBtn {
+                width: 100%;
+            }
+
+            li {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            li input,
+            li select {
+                width: 100%;
+            }
+
+            li span {
+                grid-column: span 2;
+                text-align: right;
+                font-size: 16px;
+                padding: 8px 0;
+            }
+
+            li button {
+                grid-column: span 2;
+                width: 100%;
+            }
+
+            .acoes {
+                flex-direction: column;
+            }
+
+            .acoes button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Feira Inteligente</h1>
+
+        <div class="form">
+            <input id="nomeItem" placeholder="Nome do item">
+            <input id="quantidadeItem" type="number" min="1" placeholder="Qtd">
+            <select id="categoriaItem"></select>
+            <button id="adicionarBtn">Adicionar Item</button>
+        </div>
+
+        <div class="filtro">
+            <select id="filtroCategoria"></select>
+        </div>
+
+        <ul id="lista"></ul>
+
+        <h3 id="totalGeral">Total da feira: R$ 0,00</h3>
+        <div class="totais-categoria" id="totaisCategoria"></div>
+
+        <div class="acoes">
+            <button id="limparLista">Limpar Lista</button>
+            <button id="exportarPdf">Exportar PDF</button>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <p id="modalMsg"></p>
+            <div class="modal-actions">
+                <button class="btn-cancelar" id="cancelar">Cancelar</button>
+                <button class="btn-confirmar" id="confirmar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+        const ORDEM = [
+            "Açougue/Carnes", "Padaria", "Limpeza/Higiene",
+            "Hortifruti", "Comidas/Bebidas", "Outros"
+        ];
+
+        const CORES = {
+            "Açougue/Carnes": "#fef1ee",
+            "Padaria": "#fff8ed",
+            "Limpeza/Higiene": "#eef9fd",
+            "Hortifruti": "#eefbf4",
+            "Comidas/Bebidas": "#f8f3ff",
+            "Outros": "#f8f9fa"
+        };
+
+        let itens = JSON.parse(localStorage.getItem("lista")) || [];
+        let acao = null;
+
+        const modal = document.getElementById("modal");
+        const toast = document.getElementById("toast");
+        const filtroCategoria = document.getElementById("filtroCategoria");
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(() => toast.classList.remove("show"), 2500);
+        }
+
+        function abrirModal(msg, callback) {
+            document.getElementById("modalMsg").textContent = msg;
+            acao = callback;
+            modal.style.display = "flex";
+        }
+
+        document.getElementById("confirmar").onclick = () => {
+            acao?.();
+            modal.style.display = "none";
+        };
+
+        document.getElementById("cancelar").onclick = () => modal.style.display = "none";
+
+        function salvar() {
+            localStorage.setItem("lista", JSON.stringify(itens));
+        }
+
+        function moeda(v) {
+            return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+        }
+
+        function render() {
+            itens.sort((a, b) => ORDEM.indexOf(a.categoria) - ORDEM.indexOf(b.categoria));
+            const lista = document.getElementById("lista");
+            lista.innerHTML = "";
+            let total = 0, porCat = {};
+
+            itens.forEach((i, idx) => {
+                if (filtroCategoria.value && i.categoria !== filtroCategoria.value) return;
+
+                const li = document.createElement("li");
+                li.style.background = CORES[i.categoria];
+
+                const nome = Object.assign(document.createElement("input"), { value: i.nome });
+                const qtd = Object.assign(document.createElement("input"), { type: "number", value: i.qtd });
+                const preco = Object.assign(document.createElement("input"), { type: "number", step: "0.01", value: i.preco });
+
+                const cat = document.createElement("select");
+                ORDEM.forEach(c => cat.innerHTML += `<option ${c === i.categoria ? "selected" : ""}>${c}</option>`);
+
+                const span = document.createElement("span");
+                span.textContent = moeda(i.qtd * i.preco);
+
+                const att = () => {
+                    i.nome = nome.value;
+                    i.qtd = +qtd.value;
+                    i.preco = +preco.value;
+                    i.categoria = cat.value;
+                    salvar(); render();
+                };
+
+                [nome, qtd, preco].forEach(e => e.oninput = att);
+                cat.onchange = att;
+
+                const rm = document.createElement("button");
+                rm.textContent = "Remover";
+                rm.className = "remover";
+                rm.onclick = () => abrirModal(`Remover "${i.nome}"?`, () => {
+                    itens.splice(idx, 1);
+                    salvar(); render();
+                    showToast("Item removido");
+                });
+
+                li.append(nome, qtd, preco, cat, span, rm);
+                lista.appendChild(li);
+
+                total += i.qtd * i.preco;
+                porCat[i.categoria] = (porCat[i.categoria] || 0) + i.qtd * i.preco;
+            });
+
+            totalGeral.textContent = `Total da feira: ${moeda(total)}`;
+            totaisCategoria.innerHTML = "<strong>Total por categoria:</strong><br>";
+            Object.entries(porCat).forEach(([c, v]) => totaisCategoria.innerHTML += `${c}: ${moeda(v)}<br>`);
+        }
+
+        adicionarBtn.onclick = () => {
+            if (!nomeItem.value || quantidadeItem.value <= 0) return;
+            if (itens.some(item => item.nome.toLowerCase() === nomeItem.value.toLowerCase())) {
+                showToast("Item já existe na lista");
+                return;
+            }
+            itens.push({ nome: nomeItem.value, qtd: +quantidadeItem.value, preco: 0, categoria: categoriaItem.value });
+            nomeItem.value = ""; quantidadeItem.value = "";
+            salvar(); render();
+            showToast("Item adicionado");
+        };
+
+        document.addEventListener("keydown", e => {
+            if (e.key === "Enter") adicionarBtn.click();
+        });
+
+        limparLista.onclick = () => abrirModal("Limpar toda a lista?", () => {
+            itens = []; salvar(); render();
+            showToast("Lista limpa");
+        });
+
+        ORDEM.forEach(c => {
+            categoriaItem.innerHTML += `<option>${c}</option>`;
+            filtroCategoria.innerHTML += `<option>${c}</option>`;
+        });
+        filtroCategoria.innerHTML = "<option value=''>Todas as categorias</option>" + filtroCategoria.innerHTML;
+
+        filtroCategoria.onchange = render;
+
+        render();
+    </script>
+
+</body>
+
+</html>
