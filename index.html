@@ -18,7 +18,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #4e5c72 0%, #adc0d3 100%);
+            background: linear-gradient(135deg, #d4dce5 0%, #bdc9d6 100%);
             padding: 20px;
             min-height: 100vh;
         }
@@ -26,10 +26,10 @@
         .container {
             max-width: 900px;
             margin: auto;
-            background: #c8d0e0;
+            background: #e8eef5;
             padding: 32px;
             border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(81, 97, 102, 0.08);
+            box-shadow: 0 4px 20px rgba(81, 97, 102, 0.15);
             overflow-x: hidden;
         }
 
@@ -55,11 +55,11 @@
         button {
             padding: 12px 16px;
             font-size: 15px;
-            border: 2px solid #e9ecef;
+            border: 2px solid #d0dae6;
             border-radius: 12px;
             font-family: 'Inter', sans-serif;
             transition: all 0.2s ease;
-            background: #ffffff;
+            background: #f5f8fb;
         }
 
         input:focus,
@@ -138,13 +138,13 @@
         }
 
         li:hover {
-            border-color: #e9ecef;
-            box-shadow: 0 2px 8px rgba(81, 97, 102, 0.06);
+            border-color: #d0dae6;
+            box-shadow: 0 2px 8px rgba(81, 97, 102, 0.1);
         }
 
         li input,
         li select {
-            border: 1px solid rgba(81, 97, 102, 0.15);
+            border: 1px solid rgba(81, 97, 102, 0.2);
             padding: 8px 12px;
             font-size: 14px;
             border-radius: 8px;
@@ -152,6 +152,7 @@
             max-width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
+            background: #f5f8fb;
         }
 
         li input:focus,
@@ -221,10 +222,10 @@
 
         .totais-categoria {
             margin-top: 16px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
+            background: linear-gradient(135deg, #d8dfe8 0%, #cdd5df 100%);
             padding: 20px;
             border-radius: 12px;
-            border: 2px solid #e9ecef;
+            border: 2px solid #c0cad6;
         }
 
         .totais-categoria strong {
@@ -261,12 +262,12 @@
         }
 
         .modal-content {
-            background: white;
+            background: #e8eef5;
             padding: 32px;
             border-radius: 16px;
             max-width: 360px;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(81, 97, 102, 0.2);
+            box-shadow: 0 8px 32px rgba(81, 97, 102, 0.25);
             animation: slideUp 0.3s ease;
         }
 
@@ -309,7 +310,7 @@
         }
 
         .btn-cancelar {
-            background: #e9ecef;
+            background: #d0dae6;
             border: none;
             padding: 12px 24px;
             border-radius: 10px;
@@ -319,7 +320,7 @@
         }
 
         .btn-cancelar:hover {
-            background: #dee2e6;
+            background: #bec9d6;
         }
 
         /* ===== TOAST ===== */
@@ -470,86 +471,193 @@
     <div class="toast" id="toast"></div>
 
     <script type="module">
+        // ===== CONFIGURAÇÕES INICIAIS =====
+        
+        // Define a ordem de exibição das categorias na lista
         const ORDEM = [
             "Açougue/Carnes", "Padaria", "Limpeza/Higiene",
             "Hortifruti", "Comidas/Bebidas", "Outros"
         ];
 
+        // Define as cores de fundo para cada categoria
         const CORES = {
-            "Açougue/Carnes": "#fef1ee",
-            "Padaria": "#fff8ed",
-            "Limpeza/Higiene": "#eef9fd",
-            "Hortifruti": "#eefbf4",
-            "Comidas/Bebidas": "#f8f3ff",
-            "Outros": "#f8f9fa"
+            "Açougue/Carnes": "#f5d9d9",
+            "Padaria": "#f5ead4",
+            "Limpeza/Higiene": "#d4e8f5",
+            "Hortifruti": "#d4f5e0",
+            "Comidas/Bebidas": "#e8daf5",
+            "Outros": "#e0e5ea"
         };
 
+        // Carrega a lista salva do localStorage ou inicia vazia
         let itens = JSON.parse(localStorage.getItem("lista")) || [];
+        
+        // Variável para armazenar a ação do modal de confirmação
         let acao = null;
 
+        // Referências aos elementos do DOM
         const modal = document.getElementById("modal");
         const toast = document.getElementById("toast");
 
+        // ===== FUNÇÕES DE INTERFACE =====
+        
+        /**
+         * Exibe uma mensagem toast (notificação temporária)
+         * @param {string} msg - Mensagem a ser exibida
+         */
         function showToast(msg) {
             toast.textContent = msg;
             toast.classList.add("show");
             setTimeout(() => toast.classList.remove("show"), 2500);
         }
 
+        /**
+         * Abre o modal de confirmação
+         * @param {string} msg - Mensagem de confirmação
+         * @param {function} callback - Função a ser executada ao confirmar
+         */
         function abrirModal(msg, callback) {
             document.getElementById("modalMsg").textContent = msg;
             acao = callback;
             modal.style.display = "flex";
         }
 
+        // Botão de confirmar no modal executa a ação e fecha
         document.getElementById("confirmar").onclick = () => {
             acao?.();
             modal.style.display = "none";
         };
 
+        // Botão de cancelar apenas fecha o modal
         document.getElementById("cancelar").onclick = () => modal.style.display = "none";
 
+        /**
+         * Salva a lista de itens no localStorage
+         */
         function salvar() {
             localStorage.setItem("lista", JSON.stringify(itens));
         }
 
+        /**
+         * Formata um valor numérico para moeda brasileira (R$)
+         * @param {number} v - Valor a ser formatado
+         * @returns {string} Valor formatado em moeda
+         */
         function moeda(v) {
             return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
         }
 
+        /**
+         * Atualiza os totais gerais e por categoria na tela
+         */
+        function atualizarTotais() {
+            let total = 0;
+            let porCat = {};
+            itens.forEach(i => {
+                total += i.qtd * i.preco;
+                porCat[i.categoria] = (porCat[i.categoria] || 0) + i.qtd * i.preco;
+            });
+            totalGeral.textContent = `Total da feira: ${moeda(total)}`;
+            totaisCategoria.innerHTML = "<strong>Total por categoria:</strong><br>";
+            Object.entries(porCat).forEach(([c, v]) => totaisCategoria.innerHTML += `${c}: ${moeda(v)}<br>`);
+        }
+
+        /**
+         * Renderiza a lista de itens na tela
+         * Ordena por categoria, calcula totais e aplica filtros
+         */
         function render() {
+            // Ordena itens pela ordem das categorias definida
             itens.sort((a, b) => ORDEM.indexOf(a.categoria) - ORDEM.indexOf(b.categoria));
+            
             const lista = document.getElementById("lista");
             lista.innerHTML = "";
-            let total = 0, porCat = {};
-
+            
+            // Itera sobre cada item da lista
             itens.forEach((i, idx) => {
+                // Aplica filtro de categoria se selecionado
                 if (filtroCategoria.value && i.categoria !== filtroCategoria.value) return;
 
+                // Cria o elemento da linha do item
                 const li = document.createElement("li");
                 li.style.background = CORES[i.categoria];
 
+                // Cria campos de input para nome e quantidade
                 const nome = Object.assign(document.createElement("input"), { value: i.nome });
                 const qtd = Object.assign(document.createElement("input"), { type: "number", value: i.qtd });
-                const preco = Object.assign(document.createElement("input"), { type: "number", step: "0.01", value: i.preco });
+                
+                // Campo de preço com formatação de moeda brasileira
+                const preco = document.createElement("input");
+                preco.type = "text";
+                preco.value = i.preco.toFixed(2).replace('.', ',');
+                preco.placeholder = "0,00";
 
+                // Cria select de categoria
                 const cat = document.createElement("select");
                 ORDEM.forEach(c => cat.innerHTML += `<option ${c === i.categoria ? "selected" : ""}>${c}</option>`);
 
+                // Cria span para exibir o total do item (qtd × preço)
                 const span = document.createElement("span");
                 span.textContent = moeda(i.qtd * i.preco);
 
+                // Função para atualizar os dados do item
                 const att = () => {
                     i.nome = nome.value;
                     i.qtd = +qtd.value;
-                    i.preco = +preco.value;
+                    // Converte o valor brasileiro (com vírgula) para decimal
+                    const valorLimpo = preco.value.replace(/\./g, '').replace(',', '.');
+                    i.preco = parseFloat(valorLimpo) || 0;
                     i.categoria = cat.value;
-                    salvar(); render();
+                    salvar();
+                    span.textContent = moeda(i.qtd * i.preco);
+                    atualizarTotais();
                 };
 
-                [nome, qtd, preco].forEach(e => e.oninput = att);
+                // Vincula eventos de atualização aos campos
+                [nome, qtd].forEach(e => e.oninput = att);
+                
+                // Formatação especial para o campo de preço
+                preco.oninput = () => {
+                    let valor = preco.value.replace(/\D/g, ''); // Remove tudo que não é número
+                    
+                    if (valor.length === 0) {
+                        preco.value = '';
+                        att();
+                        return;
+                    }
+                    
+                    // Converte para número e verifica limite de 1 milhão (100000000 centavos)
+                    const valorNumerico = parseInt(valor);
+                    if (valorNumerico > 100000000) {
+                        valor = '100000000'; // Limita a 1 milhão de reais
+                    }
+                    
+                    // Separa reais e centavos (últimos 2 dígitos são centavos)
+                    let reais = '0';
+                    let centavos = '00';
+                    
+                    if (valor.length === 1) {
+                        centavos = '0' + valor;
+                    } else if (valor.length === 2) {
+                        centavos = valor;
+                    } else {
+                        centavos = valor.slice(-2);
+                        reais = valor.slice(0, -2);
+                    }
+                    
+                    // Remove zeros à esquerda dos reais, mas mantém pelo menos um zero
+                    reais = reais.replace(/^0+/, '') || '0';
+                    
+                    // Adiciona pontos de milhares
+                    const reaisFormatado = reais.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    
+                    preco.value = `${reaisFormatado},${centavos}`;
+                    att();
+                };
+                
                 cat.onchange = att;
 
+                // Cria botão de remover item
                 const rm = document.createElement("button");
                 rm.textContent = "Remover";
                 rm.className = "remover";
@@ -559,42 +667,103 @@
                     showToast("Item removido");
                 });
 
+                // Adiciona todos os elementos à linha
                 li.append(nome, qtd, preco, cat, span, rm);
                 lista.appendChild(li);
-
-                total += i.qtd * i.preco;
-                porCat[i.categoria] = (porCat[i.categoria] || 0) + i.qtd * i.preco;
             });
 
-            totalGeral.textContent = `Total da feira: ${moeda(total)}`;
-            totaisCategoria.innerHTML = "<strong>Total por categoria:</strong><br>";
-            Object.entries(porCat).forEach(([c, v]) => totaisCategoria.innerHTML += `${c}: ${moeda(v)}<br>`);
+            // Atualiza os totais
+            atualizarTotais();
         }
 
+        // ===== EVENTOS DE BOTÕES =====
+        
+        /**
+         * Evento do botão "Adicionar Item"
+         * Valida os campos e adiciona um novo item à lista
+         */
         adicionarBtn.onclick = () => {
+            // Valida se o nome foi preenchido e quantidade é maior que zero
             if (!nomeItem.value || quantidadeItem.value <= 0) return;
-            itens.push({ nome: nomeItem.value, qtd: +quantidadeItem.value, preco: 0, categoria: categoriaItem.value });
-            nomeItem.value = ""; quantidadeItem.value = "";
-            salvar(); render();
+            
+            // Adiciona novo item com preço inicial zero
+            itens.push({ 
+                nome: nomeItem.value, 
+                qtd: +quantidadeItem.value, 
+                preco: 0, 
+                categoria: categoriaItem.value 
+            });
+            
+            // Limpa os campos de entrada
+            nomeItem.value = ""; 
+            quantidadeItem.value = "";
+            
+            // Salva e atualiza a tela
+            salvar(); 
+            render();
             showToast("Item adicionado");
         };
 
-        document.addEventListener("keydown", e => {
-            if (e.key === "Enter") adicionarBtn.click();
+        /**
+         * Permite adicionar item pressionando Enter nos campos
+         */
+        nomeItem.addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                quantidadeItem.focus();
+            }
         });
 
-        limparLista.onclick = () => abrirModal("Limpar toda a lista?", () => {
-            itens = []; salvar(); render();
-            showToast("Lista limpa");
+        quantidadeItem.addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                categoriaItem.focus();
+            }
         });
 
+        categoriaItem.addEventListener("keydown", e => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                adicionarBtn.click();
+            }
+        });
+
+        /**
+         * Evento do botão "Limpar Lista"
+         * Remove todos os itens após confirmação
+         */
+        limparLista.onclick = () => {
+            // Verifica se a lista está vazia antes de mostrar o modal
+            if (itens.length === 0) {
+                showToast("A lista já está vazia");
+                return;
+            }
+            abrirModal("Limpar toda a lista?", () => {
+                itens = []; 
+                salvar(); 
+                render();
+                showToast("Lista limpa");
+            });
+        };
+
+        // ===== INICIALIZAÇÃO =====
+        
+        /**
+         * Popula os selects de categoria com as opções disponíveis
+         */
         ORDEM.forEach(c => {
             categoriaItem.innerHTML += `<option>${c}</option>`;
             filtroCategoria.innerHTML += `<option>${c}</option>`;
         });
+        
+        // Adiciona opção "Todas" no filtro
         filtroCategoria.innerHTML = "<option value=''>Todas as categorias</option>" + filtroCategoria.innerHTML;
 
+        // Renderiza a lista inicial ao carregar a página
         render();
+
+        // Evento para o filtro de categoria
+        filtroCategoria.onchange = render;
     </script>
 
 </body>
