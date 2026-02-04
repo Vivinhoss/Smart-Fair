@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <title>Feira Inteligente</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -404,6 +405,90 @@
 
             .acoes button {
                 width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+
+            .form,
+            .filtro {
+                gap: 8px;
+            }
+
+            input,
+            select,
+            button {
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+
+            li {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                align-items: center;
+                padding: 12px;
+            }
+
+            li input,
+            li select {
+                flex: 1;
+                min-width: 80px;
+                font-size: 13px;
+                padding: 6px 8px;
+            }
+
+            #nomeItem {
+                flex: 2;
+                min-width: 120px;
+            }
+
+            #quantidadeItem {
+                flex: 0.6;
+                min-width: 60px;
+            }
+
+            li span {
+                flex: 1;
+                text-align: right;
+                font-weight: 600;
+                font-size: 14px;
+                min-width: 80px;
+            }
+
+            li button {
+                flex: 0.8;
+                min-width: 70px;
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .remover {
+                align-self: flex-start;
+            }
+
+            .totais-categoria {
+                padding: 16px;
+            }
+
+            .modal-content {
+                max-width: 320px;
+                padding: 24px;
+            }
+
+            .toast {
+                bottom: 16px;
+                right: 16px;
+                padding: 12px 20px;
+                font-size: 14px;
             }
         }
 
